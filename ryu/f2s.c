@@ -341,6 +341,63 @@ static inline int to_chars(const floating_decimal_32 v, const bool sign, char* c
   printf("EXP=%u\n", v.exponent + olength);
 #endif
 
+  /// Plain format without exponent
+  int32_t exp = v.exponent + (int32_t) olength - 1;
+  if (exp >= -6 && exp <= 21)
+  {
+    if (exp < 0)
+    {
+        result[index++] = '0';
+        result[index++] = '.';
+
+        while (++exp)
+            result[index++] = '0';
+
+        for (int32_t i = olength - 1; i >= 0; --i)
+        {
+            const uint32_t c = output % 10;
+            output /= 10;
+            result[index + i] = '0' + c;
+        }
+        index += olength;
+    }
+    else if (exp + 1 >= olength)
+    {
+        for (int32_t i = olength - 1; i >= 0; --i)
+        {
+            const uint32_t c = output % 10;
+            output /= 10;
+            result[index + i] = '0' + c;
+        }
+        index += olength;
+
+        while (exp >= olength)
+        {
+            result[index++] = '0';
+            --exp;
+        }
+    }
+    else
+    {
+        for (int32_t i = olength; i > exp + 1; --i)
+        {
+            const uint32_t c = output % 10;
+            output /= 10;
+            result[index + i] = '0' + c;
+        }
+        result[index + exp + 1] = '.';
+        for (int32_t i = exp; i >= 0; --i)
+        {
+            const uint32_t c = output % 10;
+            output /= 10;
+            result[index + i] = '0' + c;
+        }
+        index += olength + 1;
+    }
+
+    return index;
+  }
+
   // Print the decimal digits.
   // The following code is equivalent to:
   // for (uint32_t i = 0; i < olength - 1; ++i) {
@@ -386,8 +443,8 @@ static inline int to_chars(const floating_decimal_32 v, const bool sign, char* c
   }
 
   // Print the exponent.
-  result[index++] = 'E';
-  int32_t exp = v.exponent + (int32_t) olength - 1;
+  result[index++] = 'e';
+
   if (exp < 0) {
     result[index++] = '-';
     exp = -exp;
