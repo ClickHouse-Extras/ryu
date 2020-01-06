@@ -329,7 +329,7 @@ static inline int to_chars(const floating_decimal_64 v, const bool sign, char* c
 
   /// Plain format without exponent
   int32_t exp = v.exponent + (int32_t) olength - 1;
-  if (exp >= -6 && exp <= 21)
+  if (exp >= -6 && exp <= 20)
   {
     if (exp < 0)
     {
